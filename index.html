@@ -1,0 +1,1846 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NovaPlay — Films & Séries en Streaming</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #111118;
+    --bg3: #1a1a24;
+    --card: #16161f;
+    --border: #ffffff0f;
+    --accent: #e8272a;
+    --accent2: #ff6b35;
+    --text: #f0f0f5;
+    --muted: #7a7a90;
+    --gold: #f5c542;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center;
+    padding: 0 14px; height: 56px;
+    background: rgba(10,10,15,0.97);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+  }
+  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 2px; color: var(--text); text-decoration: none; flex-shrink: 0; }
+  .logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 24px; list-style: none; flex-shrink: 0; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; letter-spacing: 0.5px; }
+  .nav-links a:hover, .nav-links a.active { color: var(--text); }
+
+  /* BARRE DE RECHERCHE CENTRALE */
+  .nav-search {
+    flex: 1;
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg3); border: 1.5px solid var(--border);
+    border-radius: 20px; padding: 8px 14px;
+    cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s;
+    min-width: 0;
+  }
+  .nav-search:hover { border-color: rgba(232,39,42,0.5); box-shadow: 0 0 0 3px rgba(232,39,42,0.08); }
+  .nav-search svg { color: var(--muted); flex-shrink: 0; width: 14px; height: 14px; }
+  .nav-search span { color: var(--muted); font-size: 13px; font-family: 'DM Sans', sans-serif; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+  .nav-right { display: flex; align-items: center; flex-shrink: 0; }
+  .btn-login {
+    background: var(--accent); color: white; border: none;
+    border-radius: 16px; padding: 7px 14px;
+    font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700;
+    cursor: pointer; transition: opacity 0.2s; white-space: nowrap;
+  }
+  .btn-login:hover { opacity: 0.85; }
+  .user-avatar {
+    width: 30px; height: 30px; background: var(--accent); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; cursor: pointer; border: none; color: white;
+    font-family: 'DM Sans', sans-serif; transition: opacity 0.2s;
+  }
+  .user-avatar:hover { opacity: 0.85; }
+
+  @media (min-width: 769px) {
+    nav { padding: 0 32px; height: 64px; gap: 16px; }
+    .logo { font-size: 28px; letter-spacing: 3px; }
+    .nav-search { max-width: 420px; padding: 9px 18px; border-radius: 24px; }
+    .nav-search svg { width: 15px; height: 15px; }
+    .nav-search span { font-size: 14px; }
+    .btn-login { font-size: 13px; padding: 8px 20px; border-radius: 20px; }
+    .user-avatar { width: 34px; height: 34px; font-size: 13px; }
+  }
+
+  /* HERO */
+  .hero {
+    position: relative; height: 92vh; display: flex; align-items: flex-end;
+    padding: 0 60px 80px;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, #1a0a1e 0%, #0d0d1a 40%, #0a1020 100%);
+  }
+  .hero-bg::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 70% 40%, rgba(232,39,42,0.12), transparent 60%),
+                radial-gradient(ellipse 40% 40% at 20% 80%, rgba(255,107,53,0.08), transparent 50%);
+  }
+  .hero-poster {
+    position: absolute; right: 0; top: 0; bottom: 0; width: 55%;
+    background: linear-gradient(to right, var(--bg) 0%, transparent 30%), url('https://image.tmdb.org/t/p/original/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg') center/cover no-repeat;
+    mask-image: linear-gradient(to right, transparent 0%, black 30%, black 70%, transparent 100%),
+                linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
+    mask-composite: intersect;
+    transition: background-image 0.8s ease;
+  }
+  /* CAROUSEL DOTS */
+  .hero-dots {
+    position: absolute; bottom: 32px; left: 60px; display: flex; gap: 8px; z-index: 5;
+  }
+  .hero-dot {
+    width: 28px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.25);
+    border: none; cursor: pointer; padding: 0; transition: all 0.3s;
+  }
+  .hero-dot.active { background: var(--accent); width: 42px; }
+  /* HERO ARROWS */
+  .hero-arrow {
+    position: absolute; top: 50%; transform: translateY(-50%); z-index: 5;
+    width: 42px; height: 42px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 50%; color: white; cursor: pointer; font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s; backdrop-filter: blur(6px);
+  }
+  .hero-arrow:hover { background: var(--accent); border-color: var(--accent); }
+  .hero-arrow.left { left: 16px; }
+  .hero-arrow.right { right: 16px; }
+  /* HERO FADE */
+  .hero-content { position: relative; z-index: 2; max-width: 560px; transition: opacity 0.4s; }
+  .hero-content.fade { opacity: 0; }
+  .hero-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(232,39,42,0.15); border: 1px solid rgba(232,39,42,0.3); border-radius: 20px; padding: 5px 14px; font-size: 12px; font-weight: 600; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 20px; }
+  .hero-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(52px, 7vw, 88px); line-height: 0.95; letter-spacing: 2px; margin-bottom: 16px; }
+  .hero-title span { color: var(--accent); }
+  .hero-meta { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
+  .hero-meta .rating { display: flex; align-items: center; gap: 5px; color: var(--gold); font-weight: 600; font-size: 14px; }
+  .hero-meta .year, .hero-meta .duration, .hero-meta .genre { color: var(--muted); font-size: 13px; }
+  .hero-meta .dot { width: 3px; height: 3px; background: var(--muted); border-radius: 50%; }
+  .hero-desc { color: #b0b0c8; font-size: 15px; line-height: 1.65; margin-bottom: 32px; max-width: 460px; }
+  .hero-btns { display: flex; gap: 14px; }
+  .btn-play {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--accent); color: white; border: none;
+    border-radius: 10px; padding: 14px 30px; font-family: 'DM Sans', sans-serif;
+    font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+  .btn-play:hover { background: #c91f22; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(232,39,42,0.35); }
+  .btn-info {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,0.08); color: var(--text); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 24px; font-family: 'DM Sans', sans-serif;
+    font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    backdrop-filter: blur(8px);
+  }
+  .btn-info:hover { background: rgba(255,255,255,0.14); }
+  .hero-scroll { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--muted); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; animation: bounce 2s infinite; }
+  @keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(6px)} }
+
+  /* SECTIONS */
+  .section { padding: 60px 40px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+  .section-title { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 2px; }
+  .section-title span { color: var(--accent); }
+  .see-all { color: var(--accent); font-size: 13px; font-weight: 600; text-decoration: none; letter-spacing: 0.5px; transition: opacity 0.2s; }
+  .see-all:hover { opacity: 0.7; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 4px; background: var(--bg3); border-radius: 10px; padding: 4px; width: fit-content; margin-bottom: 32px; border: 1px solid var(--border); }
+  .tab { padding: 8px 20px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; color: var(--muted); border: none; background: none; font-family: 'DM Sans', sans-serif; }
+  .tab.active { background: var(--accent); color: white; }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  /* CARDS GRID */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
+  .card {
+    background: var(--card); border-radius: 12px; overflow: hidden;
+    border: 1px solid var(--border); cursor: pointer;
+    transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+    position: relative;
+  }
+  .card:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.5); border-color: rgba(232,39,42,0.4); }
+  .card-poster { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; background: var(--bg3); }
+  .card-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(10,10,15,0.97) 0%, rgba(10,10,15,0.3) 45%, transparent 100%);
+    opacity: 0; transition: opacity 0.25s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .card:hover .card-overlay { opacity: 1; }
+  .play-circle {
+    width: 52px; height: 52px; background: var(--accent); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transform: scale(0.8); transition: transform 0.25s;
+    box-shadow: 0 0 30px rgba(232,39,42,0.5);
+  }
+  .card:hover .play-circle { transform: scale(1); }
+  .card-info { padding: 12px; }
+  .card-title { font-size: 13px; font-weight: 600; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-meta { display: flex; align-items: center; justify-content: space-between; }
+  .card-year { font-size: 11px; color: var(--muted); }
+  .card-rating { display: flex; align-items: center; gap: 3px; font-size: 11px; color: var(--gold); font-weight: 600; }
+  .card-badge {
+    position: absolute; top: 10px; left: 10px;
+    background: var(--accent); color: white; font-size: 10px; font-weight: 700;
+    padding: 3px 8px; border-radius: 4px; letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .card-badge.series { background: #2563eb; }
+  .card-badge.new { background: var(--accent2); }
+
+  /* HORIZONTAL SCROLL ROW */
+  .cards-row { display: flex; gap: 18px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+  .cards-row::-webkit-scrollbar { display: none; }
+  .cards-row .card { flex-shrink: 0; width: 180px; }
+
+  /* FEATURED BANNER */
+  .featured-banner {
+    margin: 0 40px 60px;
+    border-radius: 20px; overflow: hidden;
+    background: linear-gradient(135deg, #1a0520 0%, #0f0d20 50%, #0a1520 100%);
+    border: 1px solid var(--border);
+    display: grid; grid-template-columns: 1fr 1fr;
+    min-height: 280px; position: relative;
+  }
+  .featured-banner::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 50% 80% at 0% 50%, rgba(232,39,42,0.1), transparent);
+  }
+  .featured-left { padding: 48px; display: flex; flex-direction: column; justify-content: center; position: relative; z-index: 1; }
+  .featured-tag { display: inline-flex; align-items: center; gap: 6px; background: rgba(232,39,42,0.15); border: 1px solid rgba(232,39,42,0.25); border-radius: 6px; padding: 4px 12px; font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1.5px; width: fit-content; margin-bottom: 16px; }
+  .featured-title { font-family: 'Bebas Neue', sans-serif; font-size: 44px; letter-spacing: 1px; line-height: 1; margin-bottom: 12px; }
+  .featured-desc { color: var(--muted); font-size: 14px; line-height: 1.6; margin-bottom: 24px; max-width: 360px; }
+  .featured-right { position: relative; display: flex; align-items: center; justify-content: center; }
+  .featured-right img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; }
+  .featured-right::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to right, #0f0d20 0%, transparent 30%); z-index: 1; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    backdrop-filter: blur(6px);
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--bg2); border-radius: 18px; border: 1px solid var(--border);
+    width: min(900px, 95vw); max-height: 90vh; overflow-y: auto;
+    transform: translateY(20px) scale(0.97); transition: transform 0.3s;
+    position: relative;
+  }
+  .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+  .modal-close {
+    position: absolute; top: 16px; right: 16px; z-index: 10;
+    width: 36px; height: 36px; background: rgba(255,255,255,0.1); border: none;
+    border-radius: 50%; color: white; cursor: pointer; font-size: 18px;
+    display: flex; align-items: center; justify-content: center; transition: background 0.2s;
+  }
+  .modal-close:hover { background: var(--accent); }
+  .modal-player { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 18px 18px 0 0; overflow: hidden; }
+  .modal-player iframe { width: 100%; height: 100%; border: none; }
+  .player-placeholder {
+    width: 100%; height: 100%; background: linear-gradient(135deg, #0d0d1a, #1a0a1e);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+    cursor: pointer; transition: background 0.2s; position: relative; overflow: hidden;
+  }
+  .player-placeholder::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(232,39,42,0.1), transparent);
+  }
+  .player-placeholder:hover::before { background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(232,39,42,0.2), transparent); }
+  .play-big { width: 80px; height: 80px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 50px rgba(232,39,42,0.4); transition: transform 0.2s; }
+  .player-placeholder:hover .play-big { transform: scale(1.1); }
+  .player-placeholder p { color: var(--muted); font-size: 14px; position: relative; }
+  .modal-body { padding: 28px 32px 32px; }
+  .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 1px; margin-bottom: 10px; }
+  .modal-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .meta-pill { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 4px 12px; font-size: 12px; color: var(--muted); }
+  .meta-pill.accent { background: rgba(232,39,42,0.12); border-color: rgba(232,39,42,0.25); color: var(--accent); font-weight: 600; }
+  .modal-desc { color: #a0a0b8; font-size: 14px; line-height: 1.7; margin-bottom: 24px; }
+  .film-info { border-top: 1px solid var(--border); margin-top: 20px; padding-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .film-info-row { display: flex; gap: 8px; font-size: 13px; }
+  .film-info-label { color: var(--muted); font-weight: 600; min-width: 90px; flex-shrink: 0; }
+  .film-info-value { color: var(--text); line-height: 1.5; }
+  .episodes-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 1px; margin-bottom: 14px; color: var(--text); }
+  .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+  .episode-btn {
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px; cursor: pointer; transition: all 0.2s; text-align: center;
+    font-family: 'DM Sans', sans-serif; color: var(--text);
+  }
+  .episode-btn:hover, .episode-btn.active { background: var(--accent); border-color: var(--accent); }
+  .episode-btn .ep-num { font-size: 18px; font-weight: 700; display: block; margin-bottom: 2px; }
+  .episode-btn .ep-label { font-size: 11px; color: inherit; opacity: 0.7; }
+  .season-tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .season-tab {
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 7px;
+    padding: 6px 16px; font-size: 12px; font-weight: 600; cursor: pointer;
+    transition: all 0.2s; font-family: 'DM Sans', sans-serif; color: var(--muted);
+  }
+  .season-tab.active { background: rgba(232,39,42,0.15); border-color: rgba(232,39,42,0.4); color: var(--accent); }
+  .server-select { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+  .server-label { font-size: 12px; color: var(--muted); font-weight: 600; margin-right: 4px; }
+  .lang-btn {
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 6px;
+    padding: 5px 16px; font-size: 12px; font-weight: 700; cursor: pointer;
+    transition: all 0.2s; font-family: 'DM Sans', sans-serif; color: var(--muted);
+    letter-spacing: 1px;
+  }
+  .lang-btn.active { background: rgba(232,39,42,0.18); border-color: rgba(232,39,42,0.5); color: var(--accent); }
+  .lang-btn:hover:not(.active) { color: var(--text); }
+  .server-btn {
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 6px;
+    padding: 5px 14px; font-size: 12px; font-weight: 600; cursor: pointer;
+    transition: all 0.2s; font-family: 'DM Sans', sans-serif; color: var(--muted);
+  }
+  .server-btn.active { background: rgba(37,99,235,0.2); border-color: rgba(37,99,235,0.5); color: #60a5fa; }
+
+  /* HAMBURGER MENU */
+  .hamburger {
+    width: 36px; height: 36px; background: none; border: none;
+    cursor: pointer; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 5px;
+    flex-shrink: 0; padding: 0;
+  }
+  .hamburger span {
+    display: block; width: 22px; height: 2px;
+    background: var(--text); border-radius: 2px;
+    transition: all 0.25s;
+  }
+  .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  .side-menu {
+    position: fixed; top: 56px; right: 0; bottom: 0; width: 260px;
+    background: var(--bg2); border-left: 1px solid var(--border);
+    z-index: 180; transform: translateX(100%); transition: transform 0.3s;
+    display: flex; flex-direction: column; padding: 12px 0;
+    backdrop-filter: blur(12px);
+  }
+  .side-menu.open { transform: translateX(0); }
+  .side-menu-backdrop {
+    position: fixed; inset: 0; z-index: 170; background: rgba(0,0,0,0.5);
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  .side-menu-backdrop.open { opacity: 1; pointer-events: all; }
+  .side-menu-item {
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 24px; cursor: pointer; transition: background 0.2s;
+    color: var(--text); text-decoration: none; font-size: 17px; font-weight: 500;
+    border: none; background: none; font-family: 'DM Sans', sans-serif; width: 100%;
+    text-align: left;
+  }
+  .side-menu-item:hover { background: var(--bg3); }
+  .side-menu-item svg { color: var(--muted); flex-shrink: 0; }
+  .side-menu-divider { height: 1px; background: var(--border); margin: 8px 0; }
+
+  /* FAVORIS */
+  .fav-btn {
+    position: absolute; top: 8px; right: 8px;
+    width: 28px; height: 28px; background: rgba(0,0,0,0.6);
+    border: none; border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; transition: all 0.2s; z-index: 2;
+    backdrop-filter: blur(4px);
+  }
+  .fav-btn:hover { background: rgba(232,39,42,0.7); transform: scale(1.15); }
+  .fav-btn.active { background: var(--accent); }
+
+  @media (min-width: 769px) {
+    .side-menu { top: 64px; }
+    .hamburger { display: none; }
+  }
+  .seeall-overlay {
+    position: fixed; inset: 0; z-index: 250;
+    background: var(--bg); overflow-y: auto;
+    opacity: 0; pointer-events: none; transition: opacity 0.25s;
+    padding-top: 70px;
+  }
+  .seeall-overlay.open { opacity: 1; pointer-events: all; }
+  .seeall-header {
+    display: flex; align-items: center; gap: 14px;
+    padding: 20px 24px 24px; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: var(--bg); z-index: 10;
+  }
+  .seeall-back {
+    width: 36px; height: 36px; background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text); font-size: 18px; flex-shrink: 0;
+    transition: background 0.2s; border: none;
+  }
+  .seeall-back:hover { background: var(--accent); }
+  .seeall-title { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 2px; }
+  .seeall-title span { color: var(--accent); }
+  .seeall-count { color: var(--muted); font-size: 13px; margin-left: auto; }
+  .seeall-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 18px; padding: 24px; }
+  @media (max-width: 768px) { .seeall-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 14px; padding: 16px; } }
+
+  /* SEARCH OVERLAY */
+  .search-overlay {
+    position: fixed; inset: 0; z-index: 300;
+    background: rgba(0,0,0,0.92); backdrop-filter: blur(12px);
+    display: flex; flex-direction: column; align-items: center;
+    padding-top: 120px; gap: 24px;
+    opacity: 0; pointer-events: none; transition: opacity 0.25s;
+  }
+  .search-overlay.open { opacity: 1; pointer-events: all; }
+  .search-overlay-inner { width: min(640px, 90vw); }
+  .search-big-bar {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--bg3); border: 2px solid var(--accent);
+    border-radius: 14px; padding: 14px 20px;
+  }
+  .search-big-bar input {
+    background: none; border: none; outline: none;
+    color: var(--text); font-family: 'DM Sans', sans-serif;
+    font-size: 18px; width: 100%;
+  }
+  .search-big-bar input::placeholder { color: var(--muted); }
+  .search-close-btn {
+    background: none; border: none; color: var(--muted); cursor: pointer;
+    font-size: 22px; line-height: 1; padding: 0 4px; transition: color 0.2s;
+  }
+  .search-close-btn:hover { color: var(--text); }
+  .search-results { margin-top: 8px; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; max-height: 55vh; overflow-y: auto; }
+  .search-hint { color: var(--muted); font-size: 14px; text-align: center; margin-top: 20px; }
+  .search-no-result { color: var(--muted); font-size: 14px; text-align: center; margin-top: 30px; }
+
+  /* AUTH MODAL */
+  .auth-overlay {
+    position: fixed; inset: 0; z-index: 400;
+    background: rgba(0,0,0,0.92); backdrop-filter: blur(12px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.25s;
+  }
+  .auth-overlay.open { opacity: 1; pointer-events: all; }
+  .auth-modal {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 20px; width: min(420px, 92vw); padding: 40px 36px;
+    transform: translateY(20px) scale(0.97); transition: transform 0.3s;
+    position: relative;
+  }
+  .auth-overlay.open .auth-modal { transform: translateY(0) scale(1); }
+  .auth-logo { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 3px; text-align: center; margin-bottom: 6px; }
+  .auth-logo span { color: var(--accent); }
+  .auth-subtitle { text-align: center; color: var(--muted); font-size: 13px; margin-bottom: 32px; }
+  .auth-tabs { display: flex; background: var(--bg3); border-radius: 10px; padding: 4px; margin-bottom: 28px; border: 1px solid var(--border); }
+  .auth-tab { flex: 1; padding: 9px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; color: var(--muted); border: none; background: none; font-family: 'DM Sans', sans-serif; text-align: center; }
+  .auth-tab.active { background: var(--accent); color: white; }
+  .auth-field { margin-bottom: 16px; }
+  .auth-field label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+  .auth-field input {
+    width: 100%; background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 9px; padding: 12px 16px; color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none;
+    transition: border-color 0.2s;
+  }
+  .auth-field input:focus { border-color: var(--accent); }
+  .auth-field input::placeholder { color: var(--muted); }
+  .auth-submit {
+    width: 100%; background: var(--accent); color: white; border: none;
+    border-radius: 10px; padding: 13px; font-family: 'DM Sans', sans-serif;
+    font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px;
+    transition: all 0.2s; letter-spacing: 0.3px;
+  }
+  .auth-submit:hover { background: #c91f22; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(232,39,42,0.35); }
+  .auth-error { color: var(--accent); font-size: 12px; margin-top: 10px; text-align: center; display: none; }
+  .auth-success { color: #22c55e; font-size: 13px; margin-top: 10px; text-align: center; display: none; font-weight: 600; }
+  .auth-close {
+    position: absolute; top: 16px; right: 16px;
+    width: 32px; height: 32px; background: rgba(255,255,255,0.08);
+    border: none; border-radius: 50%; color: white; cursor: pointer;
+    font-size: 16px; display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  .auth-close:hover { background: var(--accent); }
+  .auth-divider { text-align: center; color: var(--muted); font-size: 12px; margin: 18px 0; position: relative; }
+  .auth-divider::before, .auth-divider::after { content: ''; position: absolute; top: 50%; width: 38%; height: 1px; background: var(--border); }
+  .auth-divider::before { left: 0; }
+  .auth-divider::after { right: 0; }
+  .user-avatar {
+    width: 34px; height: 34px; background: var(--accent); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; cursor: pointer; border: none; color: white;
+    font-family: 'DM Sans', sans-serif; transition: opacity 0.2s;
+  }
+  .user-avatar:hover { opacity: 0.85; }
+
+  /* CATEGORIES */
+  .categories { display: flex; gap: 10px; padding: 0 40px 40px; flex-wrap: wrap; }
+  .cat-pill {
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 20px;
+    padding: 8px 18px; font-size: 13px; font-weight: 500; cursor: pointer;
+    transition: all 0.2s; color: var(--muted);
+  }
+  .cat-pill:hover, .cat-pill.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+  /* FOOTER */
+  footer {
+    background: var(--bg2); border-top: 1px solid var(--border);
+    padding: 48px 40px 28px; margin-top: 40px;
+  }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 40px; }
+  .footer-brand .logo { display: block; margin-bottom: 12px; font-size: 24px; }
+  .footer-brand p { color: var(--muted); font-size: 13px; line-height: 1.6; max-width: 240px; }
+  .footer-col h4 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text); margin-bottom: 16px; }
+  .footer-col a { display: block; color: var(--muted); font-size: 13px; text-decoration: none; margin-bottom: 10px; transition: color 0.2s; }
+  .footer-col a:hover { color: var(--text); }
+  .footer-bottom { border-top: 1px solid var(--border); padding-top: 24px; display: flex; align-items: center; justify-content: space-between; }
+  .footer-bottom p { color: var(--muted); font-size: 12px; }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    nav { padding: 0 14px; gap: 10px; }
+    .nav-links { display: none; }
+    .nav-search { max-width: none; flex: 1; padding: 8px 14px; }
+    .nav-search span { font-size: 13px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .hero { padding: 0 24px 60px; height: 85vh; }
+    .hero-poster { width: 100%; opacity: 0.3; }
+    .section { padding: 40px 20px; }
+    .featured-banner { margin: 0 20px 40px; grid-template-columns: 1fr; }
+    .featured-right { display: none; }
+    .categories { padding: 0 20px 30px; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    .cards-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    .modal-body { padding: 20px; }
+    .auth-modal { padding: 28px 20px; }
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeInUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+  .hero-content > * { animation: fadeInUp 0.7s ease both; }
+  .hero-badge { animation-delay: 0.1s; }
+  .hero-title { animation-delay: 0.2s; }
+  .hero-meta { animation-delay: 0.3s; }
+  .hero-desc { animation-delay: 0.4s; }
+  .hero-btns { animation-delay: 0.5s; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">NOVA<span>PLAY</span></a>
+  <ul class="nav-links">
+    <li><a href="#" class="active">Accueil</a></li>
+    <li><a href="#films">Films</a></li>
+    <li><a href="#series">Séries</a></li>
+    <li><a href="javascript:void(0)" onclick="openSeeAll('favoris')">Favoris</a></li>
+  </ul>
+  <div class="nav-search" onclick="openSearch()">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <span>Rechercher un film, série...</span>
+  </div>
+  <div class="nav-right">
+    <div id="nav-auth-btn">
+      <button class="btn-login" onclick="openAuth()">Connexion</button>
+    </div>
+    <button class="hamburger" id="hamburger-btn" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- SIDE MENU BACKDROP -->
+<div class="side-menu-backdrop" id="menu-backdrop" onclick="closeMenu()"></div>
+
+<!-- SIDE MENU -->
+<div class="side-menu" id="side-menu">
+  <button class="side-menu-item" onclick="scrollToSection('films'); closeMenu()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
+    Films
+  </button>
+  <button class="side-menu-item" onclick="scrollToSection('series'); closeMenu()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
+    Séries
+  </button>
+  <div class="side-menu-divider"></div>
+  <button class="side-menu-item" onclick="openSeeAll('favoris'); closeMenu()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    Mes Favoris
+  </button>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-poster" id="hero-poster"></div>
+  <button class="hero-arrow left" onclick="heroSlide(-1)">&#8249;</button>
+  <button class="hero-arrow right" onclick="heroSlide(1)">&#8250;</button>
+  <div class="hero-content" id="hero-content">
+    <div class="hero-badge">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg>
+      À la une
+    </div>
+    <h1 class="hero-title" id="hero-title"></h1>
+    <div class="hero-meta" id="hero-meta"></div>
+    <p class="hero-desc" id="hero-desc"></p>
+    <div class="hero-btns">
+      <button class="btn-play" id="hero-btn-play">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Regarder
+      </button>
+      <button class="btn-info" id="hero-btn-info">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Plus d'infos
+      </button>
+    </div>
+  </div>
+  <div class="hero-dots" id="hero-dots"></div>
+  <div class="hero-scroll" onclick="document.getElementById('films').scrollIntoView({behavior:'smooth'})" style="cursor:pointer">
+    <span>Défiler</span>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<div class="categories">
+  <span class="cat-pill active">Tout</span>
+  <span class="cat-pill">Action</span>
+  <span class="cat-pill">Comédie</span>
+  <span class="cat-pill">Drame</span>
+  <span class="cat-pill">Science-Fiction</span>
+  <span class="cat-pill">Horreur</span>
+  <span class="cat-pill">Romance</span>
+  <span class="cat-pill">Animation</span>
+  <span class="cat-pill">Thriller</span>
+  <span class="cat-pill">Documentaire</span>
+</div>
+
+<!-- FILMS POPULAIRES -->
+<section class="section" id="films">
+  <div class="section-header">
+    <h2 class="section-title">Films <span>Populaires</span></h2>
+    <a href="javascript:void(0)" class="see-all" onclick="openSeeAll('films')">Voir tout →</a>
+  </div>
+  <div class="tabs">
+    <button class="tab active">Cette semaine</button>
+    <button class="tab">Ce mois</button>
+    <button class="tab">Tous les temps</button>
+  </div>
+  <div class="cards-grid" id="films-grid"></div>
+</section>
+
+<!-- BANNER -->
+<div class="featured-banner">
+  <div class="featured-left">
+    <div class="featured-tag">
+      <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>
+      Nouveauté
+    </div>
+    <h3 class="featured-title">Stranger Things<br>Saison 5</h3>
+    <p class="featured-desc">Le chapitre final de la saga Hawkins. Eleven et ses amis affrontent une dernière fois les ténèbres du Monde à l'Envers.</p>
+    <div class="hero-btns">
+      <button class="btn-play" style="font-size:13px;padding:11px 22px" onclick="openSeriesModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Regarder
+      </button>
+    </div>
+  </div>
+  <div class="featured-right">
+    <img src="https://image.tmdb.org/t/p/w780/49WJfeN0moxb9IPfGn8AIqMGskD.jpg" alt="Stranger Things">
+  </div>
+</div>
+
+<!-- SÉRIES -->
+<section class="section" id="series">
+  <div class="section-header">
+    <h2 class="section-title">Séries <span>Tendances</span></h2>
+    <a href="javascript:void(0)" class="see-all" onclick="openSeeAll('series')">Voir tout →</a>
+  </div>
+  <div class="cards-row" id="series-grid"></div>
+</section>
+
+<!-- RÉCEMMENT AJOUTÉS -->
+<section class="section">
+  <div class="section-header">
+    <h2 class="section-title">Récemment <span>Ajoutés</span></h2>
+    <a href="javascript:void(0)" class="see-all" onclick="openSeeAll('recent')">Voir tout →</a>
+  </div>
+  <div class="cards-grid" id="recent-grid"></div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="#" class="logo">NOVA<span>PLAY</span></a>
+      <p>Votre destination ultime pour les films et séries en streaming. Qualité HD, catalogue illimité.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Navigation</h4>
+      <a href="#">Accueil</a>
+      <a href="#">Films</a>
+      <a href="#">Séries</a>
+      <a href="#">Tendances</a>
+    </div>
+    <div class="footer-col">
+      <h4>Genres</h4>
+      <a href="#">Action</a>
+      <a href="#">Comédie</a>
+      <a href="#">Horreur</a>
+      <a href="#">Animation</a>
+    </div>
+    <div class="footer-col">
+      <h4>Légal</h4>
+      <a href="#">Mentions légales</a>
+      <a href="#">Confidentialité</a>
+      <a href="#">CGU</a>
+      <a href="#">Contact</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 NovaPlay. Tous droits réservés.</p>
+    <p>Site à but éducatif — les lecteurs utilisent des sources externes.</p>
+  </div>
+</footer>
+
+<!-- MODAL FILM -->
+<div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-player" id="modal-player">
+      <div class="player-placeholder" id="player-placeholder" onclick="loadPlayer()">
+        <div class="play-big">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </div>
+        <p>Cliquez pour lancer la lecture</p>
+      </div>
+    </div>
+    <div class="modal-body">
+      <h2 class="modal-title" id="modal-title">Titre</h2>
+      <div class="modal-meta" id="modal-meta"></div>
+      <p class="modal-desc" id="modal-desc"></p>
+      <div class="server-select" id="server-select">
+        <span class="server-label">SERVEUR :</span>
+      </div>
+      <div class="film-info" id="film-info"></div>
+      <div id="episodes-section" style="display:none">
+        <h3 class="episodes-title">Épisodes</h3>
+        <div class="season-tabs" id="season-tabs"></div>
+        <div class="episodes-grid" id="episodes-grid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SEE ALL OVERLAY -->
+<div class="seeall-overlay" id="seeall-overlay">
+  <div class="seeall-header">
+    <button class="seeall-back" onclick="closeSeeAll()">←</button>
+    <h2 class="seeall-title" id="seeall-title">Titre</h2>
+    <span class="seeall-count" id="seeall-count"></span>
+  </div>
+  <div class="seeall-grid" id="seeall-grid"></div>
+</div>
+
+<!-- SEARCH OVERLAY -->
+<div class="search-overlay" id="search-overlay" onclick="closeSearchOutside(event)">
+  <div class="search-overlay-inner">
+    <div class="search-big-bar">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--muted);flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="search-input" placeholder="Rechercher un film ou une série..." oninput="handleSearch(this.value)" autocomplete="off">
+      <button class="search-close-btn" onclick="closeSearch()">✕</button>
+    </div>
+    <div id="search-results-container">
+      <p class="search-hint">Commence à taper pour rechercher dans le catalogue...</p>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="auth-overlay" id="auth-overlay" onclick="closeAuthOutside(event)">
+  <div class="auth-modal">
+    <button class="auth-close" onclick="closeAuth()">✕</button>
+    <div class="auth-logo">NOVA<span>PLAY</span></div>
+    <p class="auth-subtitle">Accède à tout le catalogue en illimité</p>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login', this)">Connexion</button>
+      <button class="auth-tab" onclick="switchAuthTab('register', this)">Inscription</button>
+    </div>
+    <!-- LOGIN -->
+    <div id="auth-login">
+      <div class="auth-field">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="ton@email.com">
+      </div>
+      <div class="auth-field">
+        <label>Mot de passe</label>
+        <input type="password" id="login-password" placeholder="••••••••">
+      </div>
+      <button class="auth-submit" onclick="handleLogin()">Se connecter</button>
+      <p class="auth-error" id="login-error">Email ou mot de passe incorrect.</p>
+      <p class="auth-success" id="login-success">✓ Connexion réussie !</p>
+    </div>
+    <!-- REGISTER -->
+    <div id="auth-register" style="display:none">
+      <div class="auth-field">
+        <label>Pseudo</label>
+        <input type="text" id="reg-name" placeholder="Ton pseudo">
+      </div>
+      <div class="auth-field">
+        <label>Email</label>
+        <input type="email" id="reg-email" placeholder="ton@email.com">
+      </div>
+      <div class="auth-field">
+        <label>Mot de passe</label>
+        <input type="password" id="reg-password" placeholder="Min. 6 caractères">
+      </div>
+      <button class="auth-submit" onclick="handleRegister()">Créer mon compte</button>
+      <p class="auth-error" id="reg-error">Cet email est déjà utilisé.</p>
+      <p class="auth-success" id="reg-success">✓ Compte créé ! Tu peux te connecter.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// =====================================================
+// DONNÉES — pour ajouter un film : copier un bloc,
+// changer les infos, et ajouter les liens vf/vostfr
+// =====================================================
+const films = [
+  {
+    id:1, title:"Dune: Deuxième Partie", year:2024, rating:8.5, genre:"Sci-Fi", type:"film", badge:"",
+    director:"Denis Villeneuve", cast:"Timothée Chalamet, Zendaya, Rebecca Ferguson, Josh Brolin",
+    desc:"Paul Atreides mène la guerre contre les conspirateurs qui ont détruit sa famille.",
+    poster:"https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",
+    vf: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt15239678",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt15239678",
+      multiembed: "https://multiembed.mov/?video_id=tt15239678&tmdb=0"
+    },
+    vostfr: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt15239678",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt15239678",
+      multiembed: "https://multiembed.mov/?video_id=tt15239678&tmdb=0"
+    }
+  },
+  {
+    id:2, title:"Oppenheimer", year:2023, rating:8.3, genre:"Drame", type:"film", badge:"",
+    director:"Christopher Nolan", cast:"Cillian Murphy, Emily Blunt, Matt Damon, Robert Downey Jr.",
+    desc:"L'histoire de J. Robert Oppenheimer et la création de la bombe atomique.",
+    poster:"https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
+    vf: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt15398776",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt15398776",
+      multiembed: "https://multiembed.mov/?video_id=tt15398776&tmdb=0"
+    },
+    vostfr: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt15398776",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt15398776",
+      multiembed: "https://multiembed.mov/?video_id=tt15398776&tmdb=0"
+    }
+  },
+  {
+    id:3, title:"Barbie", year:2023, rating:7.0, genre:"Comédie", type:"film", badge:"",
+    director:"Greta Gerwig", cast:"Margot Robbie, Ryan Gosling, America Ferrera, Kate McKinnon",
+    desc:"Barbie et Ken s'aventurent dans le monde réel après avoir quitté Barbieland.",
+    poster:"https://image.tmdb.org/t/p/w500/iuFNMS8vlbbs6BpVWy8J0e7YULA.jpg",
+    vf: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt1517268",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt1517268",
+      multiembed: "https://multiembed.mov/?video_id=tt1517268&tmdb=0"
+    },
+    vostfr: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt1517268",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt1517268",
+      multiembed: "https://multiembed.mov/?video_id=tt1517268&tmdb=0"
+    }
+  },
+  {
+    id:4, title:"Interstellar", year:2014, rating:8.6, genre:"Sci-Fi", type:"film", badge:"",
+    director:"Christopher Nolan", cast:"Matthew McConaughey, Anne Hathaway, Jessica Chastain, Michael Caine",
+    desc:"Un groupe d'explorateurs voyage à travers un trou de ver pour assurer la survie de l'humanité.",
+    poster:"https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+    vf: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt0816692",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt0816692",
+      multiembed: "https://multiembed.mov/?video_id=tt0816692&tmdb=0"
+    },
+    vostfr: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt0816692",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt0816692",
+      multiembed: "https://multiembed.mov/?video_id=tt0816692&tmdb=0"
+    }
+  },
+  {
+    id:5, title:"The Batman", year:2022, rating:7.8, genre:"Action", type:"film", badge:"",
+    director:"Matt Reeves", cast:"Robert Pattinson, Zoë Kravitz, Paul Dano, Colin Farrell",
+    desc:"Batman s'aventure dans la corruption de Gotham City et affronte le Riddler.",
+    poster:"https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg",
+    vf: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt1877830",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt1877830",
+      multiembed: "https://multiembed.mov/?video_id=tt1877830&tmdb=0"
+    },
+    vostfr: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt1877830",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt1877830",
+      multiembed: "https://multiembed.mov/?video_id=tt1877830&tmdb=0"
+    }
+  },
+  {
+    id:6, title:"Avatar 2", year:2022, rating:7.6, genre:"Sci-Fi", type:"film", badge:"NEW",
+    director:"James Cameron", cast:"Sam Worthington, Zoe Saldana, Sigourney Weaver, Kate Winslet",
+    desc:"Jake Sully et Neytiri forment une famille sur Pandore et doivent la défendre.",
+    poster:"https://image.tmdb.org/t/p/w500/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg",
+    vf: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt1630029",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt1630029",
+      multiembed: "https://multiembed.mov/?video_id=tt1630029&tmdb=0"
+    },
+    vostfr: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt1630029",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt1630029",
+      multiembed: "https://multiembed.mov/?video_id=tt1630029&tmdb=0"
+    }
+  },
+  {
+    id:7, title:"Gladiator II", year:2024, rating:7.2, genre:"Action", type:"film", badge:"NEW",
+    director:"Ridley Scott", cast:"Paul Mescal, Pedro Pascal, Denzel Washington, Connie Nielsen",
+    desc:"Lucius est contraint de combattre dans le Colisée pour retrouver la gloire de Rome.",
+    poster:"https://image.tmdb.org/t/p/w500/2cxhvwyEwRlysAmRH4iodkvo0z5.jpg",
+    vf: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt9218128",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt9218128",
+      multiembed: "https://multiembed.mov/?video_id=tt9218128&tmdb=0"
+    },
+    vostfr: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt9218128",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt9218128",
+      multiembed: "https://multiembed.mov/?video_id=tt9218128&tmdb=0"
+    }
+  },
+  {
+    id:8, title:"Deadpool & Wolverine", year:2024, rating:7.7, genre:"Action", type:"film", badge:"NEW",
+    director:"Shawn Levy", cast:"Ryan Reynolds, Hugh Jackman, Emma Corrin, Matthew Macfadyen",
+    desc:"Deadpool et Wolverine s'unissent pour sauver l'univers MCU.",
+    poster:"https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg",
+    vf: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt6263850",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt6263850",
+      multiembed: "https://multiembed.mov/?video_id=tt6263850&tmdb=0"
+    },
+    vostfr: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt6263850",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt6263850",
+      multiembed: "https://multiembed.mov/?video_id=tt6263850&tmdb=0"
+    }
+  },
+  {
+    id:9, title:"Uncharted", year:2022, rating:6.9, genre:"Action", type:"film", badge:"",
+    director:"Ruben Fleischer", cast:"Tom Holland, Mark Wahlberg, Sophia Ali, Antonio Banderas",
+    desc:"Nathan Drake part avec le chasseur de trésors Sully à la recherche d'une fortune perdue par Magellan il y a 500 ans.",
+    poster:"https://image.tmdb.org/t/p/w500/sqLowacltbZLoCa4KYye64RvvdQ.jpg",
+    vf: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt1464335",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt1464335",
+      multiembed: "https://multiembed.mov/?video_id=tt1464335&tmdb=0",
+      frenchstream: "https://fsmirror46.lol/15110794-uncharted.html"
+    },
+    vostfr: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt1464335",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt1464335",
+      multiembed: "https://multiembed.mov/?video_id=tt1464335&tmdb=0"
+    }
+  },
+  {
+    id:10, title:"Batman Begins", year:2005, rating:8.2, genre:"Action", type:"film", badge:"",
+    director:"Christopher Nolan", cast:"Christian Bale, Michael Caine, Liam Neeson, Katie Holmes",
+    desc:"Bruce Wayne part se former aux arts martiaux pour revenir à Gotham et devenir Batman, un justicier masqué luttant contre le crime.",
+    poster:"https://image.tmdb.org/t/p/w500/8RW2runSEc34IwKN2D1aPcJd2UL.jpg",
+    vf: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt0372784",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt0372784",
+      multiembed: "https://multiembed.mov/?video_id=tt0372784&tmdb=0"
+    },
+    vostfr: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt0372784",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt0372784",
+      multiembed: "https://multiembed.mov/?video_id=tt0372784&tmdb=0"
+    }
+  },
+  {
+    id:11, title:"The Dark Knight", year:2008, rating:9.0, genre:"Action", type:"film", badge:"",
+    director:"Christopher Nolan", cast:"Christian Bale, Heath Ledger, Aaron Eckhart, Michael Caine",
+    desc:"Batman fait face au Joker, un criminel anarchiste qui plonge Gotham dans le chaos et le pousse à ses limites.",
+    poster:"https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+    vf: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt0468569",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt0468569",
+      multiembed: "https://multiembed.mov/?video_id=tt0468569&tmdb=0"
+    },
+    vostfr: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt0468569",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt0468569",
+      multiembed: "https://multiembed.mov/?video_id=tt0468569&tmdb=0"
+    }
+  },
+  {
+    id:12, title:"The Dark Knight Rises", year:2012, rating:8.4, genre:"Action", type:"film", badge:"",
+    director:"Christopher Nolan", cast:"Christian Bale, Tom Hardy, Anne Hathaway, Gary Oldman",
+    desc:"Huit ans après la disparition de Batman, le terroriste Bane force Bruce Wayne à reprendre le masque pour sauver Gotham.",
+    poster:"https://image.tmdb.org/t/p/w500/hr0L2aueqlP2BYUblTTjmtn1lZx.jpg",
+    vf: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt1345836",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt1345836",
+      multiembed: "https://multiembed.mov/?video_id=tt1345836&tmdb=0"
+    },
+    vostfr: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt1345836",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt1345836",
+      multiembed: "https://multiembed.mov/?video_id=tt1345836&tmdb=0"
+    }
+  },
+  {
+    id:13, title:"Superman", year:2025, rating:7.0, genre:"Action", type:"film", badge:"NEW",
+    director:"James Gunn", cast:"David Corenswet, Rachel Brosnahan, Nicholas Hoult, Isabela Merced",
+    desc:"Clark Kent cherche à concilier son héritage kryptonien avec son éducation humaine tout en affrontant Lex Luthor.",
+    poster:"https://image.tmdb.org/t/p/w500/uNI5lIBEO4JMcBcSfS0ECcnSNSb.jpg",
+    vf: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt5950044",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt5950044",
+      multiembed: "https://multiembed.mov/?video_id=tt5950044&tmdb=0"
+    },
+    vostfr: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt5950044",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt5950044",
+      multiembed: "https://multiembed.mov/?video_id=tt5950044&tmdb=0"
+    }
+  },
+  {
+    id:14, title:"F1", year:2025, rating:7.6, genre:"Sport", type:"film", badge:"NEW",
+    director:"Joseph Kosinski", cast:"Brad Pitt, Damson Idris, Javier Bardem, Kerry Condon",
+    desc:"Une légende de la Formule 1 sort de sa retraite pour sauver une écurie en difficulté et mentorer un jeune pilote prodige.",
+    poster:"https://image.tmdb.org/t/p/w500/6CoRTJTmijhBLJTUNoVSUNxZMEI.jpg",
+    vf: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt16311594",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt16311594",
+      multiembed: "https://multiembed.mov/?video_id=tt16311594&tmdb=0"
+    },
+    vostfr: {
+      vidsrc: "https://vidsrc.to/embed/movie/tt16311594",
+      vidsrc2: "https://vidsrc.me/embed/movie?imdb=tt16311594",
+      multiembed: "https://multiembed.mov/?video_id=tt16311594&tmdb=0"
+    }
+  },
+];
+
+const series = [
+  {
+    id:101, title:"Breaking Bad", year:2008, rating:9.5, genre:"Drame", type:"series", badge:"SÉRIE",
+    director:"Vince Gilligan", cast:"Bryan Cranston, Aaron Paul, Anna Gunn, Dean Norris",
+    desc:"Un professeur de chimie devient fabricant de méthamphétamine.",
+    poster:"https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg", seasons:5,
+    tmdbId:"1396", imdbId:"tt0903747"
+  },
+  {
+    id:102, title:"Stranger Things", year:2016, rating:8.7, genre:"Sci-Fi", type:"series", badge:"SÉRIE",
+    director:"Les Frères Duffer", cast:"Millie Bobby Brown, Finn Wolfhard, Winona Ryder, David Harbour",
+    desc:"Des enfants affrontent des forces surnaturelles dans leur ville.",
+    poster:"https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg", seasons:4,
+    tmdbId:"66732", imdbId:"tt4574334"
+  },
+  {
+    id:103, title:"The Last of Us", year:2023, rating:8.8, genre:"Action", type:"series", badge:"SÉRIE",
+    director:"Craig Mazin, Neil Druckmann", cast:"Pedro Pascal, Bella Ramsey, Anna Torv, Gabriel Luna",
+    desc:"Joel escort Ellie à travers les États-Unis post-apocalyptiques.",
+    poster:"https://image.tmdb.org/t/p/w500/uKvVjHNqB5VmOrdxqAt2F7J78ED.jpg", seasons:2,
+    tmdbId:"100088", imdbId:"tt3581920"
+  },
+  {
+    id:104, title:"Squid Game", year:2021, rating:8.0, genre:"Thriller", type:"series", badge:"SÉRIE",
+    director:"Hwang Dong-hyuk", cast:"Lee Jung-jae, Park Hae-soo, Wi Ha-joon, HoYeon Jung",
+    desc:"Des personnes endettées jouent à des jeux mortels pour gagner de l'argent.",
+    poster:"https://image.tmdb.org/t/p/w500/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg", seasons:2,
+    tmdbId:"93405", imdbId:"tt10919420"
+  },
+  {
+    id:105, title:"House of the Dragon", year:2022, rating:8.4, genre:"Fantaisie", type:"series", badge:"SÉRIE",
+    director:"Ryan Condal, Miguel Sapochnik", cast:"Paddy Considine, Matt Smith, Olivia Cooke, Emma D'Arcy",
+    desc:"La préquelle de Game of Thrones centrée sur la maison Targaryen.",
+    poster:"https://image.tmdb.org/t/p/w500/z2yahl2uefxDCl0nogcRBstwruJ.jpg", seasons:2,
+    tmdbId:"94997", imdbId:"tt11198330"
+  },
+  {
+    id:106, title:"The Bear", year:2022, rating:8.7, genre:"Drame", type:"series", badge:"SÉRIE",
+    director:"Christopher Storer", cast:"Jeremy Allen White, Ebon Moss-Bachrach, Ayo Edebiri, Lionel Boyce",
+    desc:"Un chef étoilé reprend le restaurant familial de son frère décédé.",
+    poster:"https://image.tmdb.org/t/p/w500/sHFlbKS3WLqMnp9t2ghADIJFnuQ.jpg", seasons:3,
+    tmdbId:"136315", imdbId:"tt14452776"
+  },
+  {
+    id:107, title:"The Walking Dead", year:2010, rating:8.2, genre:"Horreur", type:"series", badge:"SÉRIE",
+    desc:"Dans un monde post-apocalyptique envahi par les zombies, un shérif part à la recherche de sa famille et tente de survivre avec un groupe de rescapés.",
+    poster:"https://image.tmdb.org/t/p/w500/xf9wuDcqlUPWABZNeDKPbZUjWx0.jpg", seasons:11,
+    tmdbId:"1402", imdbId:"tt1520211",
+    vf: {
+      vidsrc: "https://vidsrc.to/embed/tv/1402/{s}/{e}",
+      vidsrc2: "https://vidsrc.me/embed/tv?tmdb=1402&season={s}&episode={e}",
+      multiembed: "https://multiembed.mov/?video_id=1402&tmdb=1&s={s}&e={e}",
+      frenchstream: [
+        "https://fs02.lol/9349-the-walking-dead-saison-1-2010.html",
+        "https://fs02.lol/3485-the-walking-dead-saison-2-2010.html",
+        "https://fs02.lol/9351-the-walking-dead-saison-3-2010.html",
+        "https://fs02.lol/9352-the-walking-dead-saison-4-2010.html",
+        "https://fs02.lol/9353-the-walking-dead-saison-5-2010.html",
+        "https://fs02.lol/9354-the-walking-dead-saison-6-2010.html",
+        "https://fs02.lol/4035-the-walking-dead-saison-7-2010.html",
+        "https://fs02.lol/18033-the-walking-dead-saison-8-2010.html",
+        "https://fs02.lol/166587-the-walking-dead-saison-9-2010.html",
+        "https://fs02.lol/168801-the-walking-dead-saison-10-2010.html",
+        "https://fs02.lol/15109842-the-walking-dead-saison-11.html"
+      ]
+    },
+    vostfr: {
+      vidsrc: "https://vidsrc.to/embed/tv/1402/{s}/{e}",
+      vidsrc2: "https://vidsrc.me/embed/tv?tmdb=1402&season={s}&episode={e}",
+      multiembed: "https://multiembed.mov/?video_id=1402&tmdb=1&s={s}&e={e}",
+      movix: "https://movix.blog/tv/TRJfk5H1KOIujWPcp0k1RKN6YpQqBroMjJo",
+      frenchstream: [
+        "https://fs02.lol/9349-the-walking-dead-saison-1-2010.html",
+        "https://fs02.lol/3485-the-walking-dead-saison-2-2010.html",
+        "https://fs02.lol/9351-the-walking-dead-saison-3-2010.html",
+        "https://fs02.lol/9352-the-walking-dead-saison-4-2010.html",
+        "https://fs02.lol/9353-the-walking-dead-saison-5-2010.html",
+        "https://fs02.lol/9354-the-walking-dead-saison-6-2010.html",
+        "https://fs02.lol/4035-the-walking-dead-saison-7-2010.html",
+        "https://fs02.lol/18033-the-walking-dead-saison-8-2010.html",
+        "https://fs02.lol/166587-the-walking-dead-saison-9-2010.html",
+        "https://fs02.lol/168801-the-walking-dead-saison-10-2010.html",
+        "https://fs02.lol/15109842-the-walking-dead-saison-11.html"
+      ]
+    }
+  },
+  {
+    id:108, title:"The Penguin", year:2024, rating:8.6, genre:"Crime", type:"series", badge:"SÉRIE",
+    director:"Craig Zobel", cast:"Colin Farrell, Cristin Milioti, Rhenzy Feliz, Clancy Brown",
+    desc:"Suite de The Batman (2022) : Oswald Cobb, alias le Pingouin, cherche à prendre le contrôle du milieu criminel de Gotham après la mort de Carmine Falcone.",
+    poster:"https://image.tmdb.org/t/p/w500/oBX8YGAFUQEOd7VrMdoA0pVInXb.jpg", seasons:1,
+    tmdbId:"194764", imdbId:"tt15435876"
+  },
+  {
+    id:109, title:"The Pitt", year:2025, rating:8.8, genre:"Drame", type:"series", badge:"SÉRIE",
+    director:"R. Scott Gemmill", cast:"Noah Wyle, Tracy Ifeachor, Patrick Ball, Isa Briones",
+    desc:"Le quotidien des soignants du centre médical traumatologique de Pittsburgh, jonglant entre crises personnelles, politique hospitalière et le poids émotionnel de soigner des patients en état critique.",
+    poster:"https://image.tmdb.org/t/p/w500/s6BuUxOGFJLV1MkHZhzEJgXW7BF.jpg", seasons:1,
+    tmdbId:"250307", imdbId:"tt31938062"
+  },
+  {
+    id:110, title:"The Day of the Jackal", year:2024, rating:7.8, genre:"Thriller", type:"series", badge:"SÉRIE",
+    director:"Brian Kirk", cast:"Eddie Redmayne, Lashana Lynch, Úrsula Corberó, Chukwudi Iwuji",
+    desc:"Un assassin insaisissable parcourt l'Europe pour accomplir des contrats à prix d'or, traqué par une agent des renseignements britanniques déterminée à l'arrêter.",
+    poster:"https://image.tmdb.org/t/p/w500/5eiJLMVVE1dE9VPqknPBbCOcT5u.jpg", seasons:1,
+    tmdbId:"246806", imdbId:"tt24053860"
+  },
+  {
+    id:111, title:"Reacher", year:2022, rating:8.2, genre:"Action", type:"series", badge:"SÉRIE",
+    director:"Nick Santora", cast:"Alan Ritchson, Maria Sten, Malcolm Goodwin, Willa Fitzgerald",
+    desc:"Jack Reacher, ancien officier de la police militaire, voyage à travers les États-Unis et se retrouve mêlé à des conspirations criminelles qu'il démantèle seul grâce à sa force et son intelligence.",
+    poster:"https://image.tmdb.org/t/p/w500/gsQJOFeAMGIxdXhMTF7BNRL2rqt.jpg", seasons:3,
+    tmdbId:"108978", imdbId:"tt9288030"
+  },
+];
+
+const recent = [
+  {
+    id:201, title:"Alien: Romulus", year:2024, rating:7.3, genre:"Sci-Fi", type:"film", badge:"NEW",
+    director:"Fede Álvarez", cast:"Cailee Spaeny, David Jonsson, Archie Renaux, Isabela Merced",
+    desc:"Un groupe de jeunes astronautes affronte la forme de vie la plus terrifiante de l'univers.",
+    poster:"https://image.tmdb.org/t/p/w500/b33nnKl1GSFbao4l3fZDDqsMx0F.jpg",
+    vf: { vidsrc:"https://vidsrc.to/embed/movie/tt18412256", vidsrc2:"https://vidsrc.me/embed/movie?imdb=tt18412256", multiembed:"https://multiembed.mov/?video_id=tt18412256&tmdb=0" },
+    vostfr: { vidsrc:"https://vidsrc.to/embed/movie/tt18412256", vidsrc2:"https://vidsrc.me/embed/movie?imdb=tt18412256", multiembed:"https://multiembed.mov/?video_id=tt18412256&tmdb=0" }
+  },
+  {
+    id:202, title:"Inside Out 2", year:2024, rating:7.9, genre:"Animation", type:"film", badge:"NEW",
+    director:"Kelsey Mann", cast:"Amy Poehler, Maya Hawke, Kensington Tallman, Liza Lapira",
+    desc:"Riley entre dans l'adolescence et de nouvelles émotions font leur apparition.",
+    poster:"https://image.tmdb.org/t/p/w500/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg",
+    vf: { vidsrc:"https://vidsrc.to/embed/movie/tt22022452", vidsrc2:"https://vidsrc.me/embed/movie?imdb=tt22022452", multiembed:"https://multiembed.mov/?video_id=tt22022452&tmdb=0" },
+    vostfr: { vidsrc:"https://vidsrc.to/embed/movie/tt22022452", vidsrc2:"https://vidsrc.me/embed/movie?imdb=tt22022452", multiembed:"https://multiembed.mov/?video_id=tt22022452&tmdb=0" }
+  },
+  {
+    id:203, title:"Shogun", year:2024, rating:8.8, genre:"Drame", type:"series", badge:"SÉRIE",
+    director:"Rachel Kondo, Caillin Puente", cast:"Hiroyuki Sanada, Cosmo Jarvis, Anna Sawai, Tadanobu Asano",
+    desc:"Un navigateur anglais arrive au Japon féodal et devient samouraï.",
+    poster:"https://image.tmdb.org/t/p/w500/7O4iVfOMQmdCSxhOg1WnzM1AgZy.jpg", seasons:1,
+    tmdbId:"126308", imdbId:"tt2788316"
+  },
+  {
+    id:204, title:"Gladiator II", year:2024, rating:7.2, genre:"Action", type:"film", badge:"NEW",
+    director:"Ridley Scott", cast:"Paul Mescal, Pedro Pascal, Denzel Washington, Connie Nielsen",
+    desc:"Lucius est contraint de combattre dans le Colisée pour retrouver la gloire de Rome.",
+    poster:"https://image.tmdb.org/t/p/w500/2cxhvwyEwRlysAmRH4iodkvo0z5.jpg",
+    vf: { vidsrc:"https://vidsrc.to/embed/movie/tt9218128", vidsrc2:"https://vidsrc.me/embed/movie?imdb=tt9218128", multiembed:"https://multiembed.mov/?video_id=tt9218128&tmdb=0" },
+    vostfr: { vidsrc:"https://vidsrc.to/embed/movie/tt9218128", vidsrc2:"https://vidsrc.me/embed/movie?imdb=tt9218128", multiembed:"https://multiembed.mov/?video_id=tt9218128&tmdb=0" }
+  },
+];
+
+// =====================================================
+// CONFIG LECTEURS
+// embed = intégré directement dans la page (iframe)
+// Pour les séries les URLs sont générées dynamiquement
+// =====================================================
+let currentItem = null;
+let currentSeason = 1;
+let currentEpisode = 1;
+let currentLang = 'vf';
+let currentServerKey = 'vidsrc';
+
+const heroMovie = films[0];
+
+// HERO CAROUSEL
+const heroItems = [
+  films.find(f => f.id === 1),  // Dune 2
+  films.find(f => f.id === 11), // The Dark Knight
+  films.find(f => f.id === 4),  // Interstellar
+  series.find(s => s.id === 103), // The Last of Us
+  films.find(f => f.id === 13), // Superman
+  series.find(s => s.id === 105), // House of the Dragon
+  films.find(f => f.id === 14), // F1
+  series.find(s => s.id === 101), // Breaking Bad
+].filter(Boolean);
+
+const heroBgImages = {
+  1:   'https://image.tmdb.org/t/p/original/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg',
+  11:  'https://image.tmdb.org/t/p/original/hkBaDkMWbLaf8B1lsWsKX7Ew3Xq.jpg',
+  4:   'https://image.tmdb.org/t/p/original/xJHokMbljvjADYdit5fK5VQsXEG.jpg',
+  103: 'https://image.tmdb.org/t/p/original/uKvVjHNqB5VmOrdxqAt2F7J78ED.jpg',
+  13:  'https://image.tmdb.org/t/p/original/uNI5lIBEO4JMcBcSfS0ECcnSNSb.jpg',
+  105: 'https://image.tmdb.org/t/p/original/z2yahl2uefxDCl0nogcRBstwruJ.jpg',
+  14:  'https://image.tmdb.org/t/p/original/6CoRTJTmijhBLJTUNoVSUNxZMEI.jpg',
+  101: 'https://image.tmdb.org/t/p/original/ggFHVNu6YYI5L9pCfOacjizRGt.jpg',
+};
+
+let heroIndex = 0;
+let heroTimer = null;
+
+function updateHero(idx, animate = true) {
+  heroIndex = (idx + heroItems.length) % heroItems.length;
+  const item = heroItems[heroIndex];
+  const content = document.getElementById('hero-content');
+
+  if (animate) {
+    content.classList.add('fade');
+    setTimeout(() => doUpdateHero(item, content), 400);
+  } else {
+    doUpdateHero(item, content);
+  }
+
+  // dots
+  document.querySelectorAll('.hero-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === heroIndex);
+  });
+}
+
+function doUpdateHero(item, content) {
+  const bg = document.getElementById('hero-poster');
+  const imgUrl = heroBgImages[item.id] || item.poster;
+  bg.style.background = `linear-gradient(to right, var(--bg) 0%, transparent 30%), url('${imgUrl}') center/cover no-repeat`;
+
+  const titleParts = item.title.split(':');
+  document.getElementById('hero-title').innerHTML = titleParts.length > 1
+    ? `${titleParts[0]}:<br><span>${titleParts[1].trim()}</span>`
+    : `<span>${item.title}</span>`;
+
+  document.getElementById('hero-meta').innerHTML = `
+    <span class="rating">★ ${item.rating}</span>
+    <span class="dot"></span>
+    <span class="year">${item.year}</span>
+    <span class="dot"></span>
+    <span class="genre">${item.genre}</span>
+    <span class="dot"></span>
+    <span class="duration">${item.type === 'series' ? '📺 Série' : '🎬 Film'}</span>
+  `;
+  document.getElementById('hero-desc').textContent = item.desc;
+  document.getElementById('hero-btn-play').onclick = () => openModal(item);
+  document.getElementById('hero-btn-info').onclick = () => openModal(item);
+  content.classList.remove('fade');
+}
+
+function heroSlide(dir) {
+  resetHeroTimer();
+  updateHero(heroIndex + dir);
+}
+
+function resetHeroTimer() {
+  clearInterval(heroTimer);
+  heroTimer = setInterval(() => updateHero(heroIndex + 1), 6000);
+}
+
+function initHero() {
+  const dotsEl = document.getElementById('hero-dots');
+  heroItems.forEach((_, i) => {
+    const d = document.createElement('button');
+    d.className = 'hero-dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => { resetHeroTimer(); updateHero(i); };
+    dotsEl.appendChild(d);
+  });
+  updateHero(0, false);
+  resetHeroTimer();
+}
+
+// Définition des serveurs
+// type "embed" = iframe intégré | type "link" = bouton ouvrir dans un onglet
+const serverDefs = [
+  { key: "vidsrc",    name: "VidSrc",     type: "embed",
+    getUrl: (item, lang, s, e) => {
+      if (item.type === 'film') return (item[lang] && item[lang].vidsrc) || null;
+      return `https://vidsrc.to/embed/tv/${item.tmdbId}/${s}/${e}`;
+    }
+  },
+  { key: "vidsrc2",   name: "VidSrc 2",   type: "embed",
+    getUrl: (item, lang, s, e) => {
+      if (item.type === 'film') return (item[lang] && item[lang].vidsrc2) || null;
+      return `https://vidsrc.me/embed/tv?tmdb=${item.tmdbId}&season=${s}&episode=${e}`;
+    }
+  },
+  { key: "multiembed", name: "MultiEmbed", type: "embed",
+    getUrl: (item, lang, s, e) => {
+      if (item.type === 'film') return (item[lang] && item[lang].multiembed) || null;
+      return `https://multiembed.mov/?video_id=${item.tmdbId}&tmdb=1&s=${s}&e=${e}`;
+    }
+  },
+  { key: "frenchstream", name: "🇫🇷 French Stream", type: "link",
+    getUrl: (item, lang, s, e) => {
+      if (!item[lang] || !item[lang].frenchstream) return null;
+      const fs = item[lang].frenchstream;
+      // Tableau de liens par saison
+      if (Array.isArray(fs)) return fs[s - 1] || null;
+      // Lien unique (films)
+      if (item.type === 'series') return fs.replace('{s}', s).replace('{e}', e);
+      return fs;
+    }
+  },
+  { key: "movix", name: "🎬 Movix", type: "link",
+    getUrl: (item, lang, s, e) => {
+      if (!item[lang] || !item[lang].movix) return null;
+      return item[lang].movix;
+    }
+  },
+];
+
+function createCard(item) {
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.onclick = () => openModal(item);
+  const favActive = isFavori(item.id);
+  div.innerHTML = `
+    ${item.badge ? `<div class="card-badge ${item.type === 'series' ? 'series' : item.badge === 'NEW' ? 'new' : ''}">${item.badge}</div>` : ''}
+    <button class="fav-btn ${favActive ? 'active' : ''}" data-id="${item.id}">${favActive ? '❤️' : '🤍'}</button>
+    <img class="card-poster" src="${item.poster}" alt="${item.title}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450/16161f/7a7a90?text=NovaPlay'">
+    <div class="card-overlay">
+      <div class="play-circle">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      </div>
+    </div>
+    <div class="card-info">
+      <div class="card-title">${item.title}</div>
+      <div class="card-meta">
+        <span class="card-year">${item.year}</span>
+        <span class="card-rating">★ ${item.rating}</span>
+      </div>
+    </div>
+  `;
+  // Attacher l'event sur le bouton favori après insertion
+  div.querySelector('.fav-btn').addEventListener('click', (e) => toggleFavori(e, item));
+  return div;
+}
+
+function renderGrids() {
+  const fg = document.getElementById('films-grid');
+  const sg = document.getElementById('series-grid');
+  const rg = document.getElementById('recent-grid');
+  films.forEach(f => fg.appendChild(createCard(f)));
+  series.forEach(s => sg.appendChild(createCard(s)));
+  recent.forEach(r => rg.appendChild(createCard(r)));
+}
+
+function openModal(item) {
+  currentItem = item;
+  currentSeason = 1;
+  currentEpisode = 1;
+  currentLang = 'vf';
+  currentServerKey = 'vidsrc';
+
+  document.getElementById('modal-title').textContent = item.title;
+  document.getElementById('modal-desc').textContent = item.desc;
+
+  const meta = document.getElementById('modal-meta');
+  meta.innerHTML = `
+    <span class="meta-pill accent">★ ${item.rating}</span>
+    <span class="meta-pill">${item.year}</span>
+    <span class="meta-pill">${item.genre}</span>
+    <span class="meta-pill">${item.type === 'film' ? '🎬 Film' : '📺 Série'}</span>
+  `;
+
+  buildServerSelect();
+
+  // Infos réalisateur / acteurs
+  const infoEl = document.getElementById('film-info');
+  infoEl.innerHTML = '';
+  if (item.director) {
+    infoEl.innerHTML += `<div class="film-info-row"><span class="film-info-label">Réalisateur</span><span class="film-info-value">${item.director}</span></div>`;
+  }
+  if (item.cast) {
+    infoEl.innerHTML += `<div class="film-info-row"><span class="film-info-label">Acteurs</span><span class="film-info-value">${item.cast}</span></div>`;
+  }
+
+  const ep = document.getElementById('episodes-section');
+  if (item.type === 'series') {
+    ep.style.display = 'block';
+    buildSeasons(item.seasons || 1);
+  } else {
+    ep.style.display = 'none';
+  }
+
+  resetPlayer();
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function buildServerSelect() {
+  const ss = document.getElementById('server-select');
+  ss.innerHTML = '';
+
+  // Ligne LANGUE
+  const langRow = document.createElement('div');
+  langRow.style.cssText = 'display:flex;align-items:center;gap:8px;width:100%;margin-bottom:10px;flex-wrap:wrap;';
+  const langLabel = document.createElement('span');
+  langLabel.className = 'server-label';
+  langLabel.textContent = 'LANGUE :';
+  langRow.appendChild(langLabel);
+
+  ['vf','vostfr'].forEach(lang => {
+    const btn = document.createElement('button');
+    btn.className = 'lang-btn' + (lang === currentLang ? ' active' : '');
+    btn.textContent = lang.toUpperCase();
+    btn.onclick = () => {
+      currentLang = lang;
+      document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      reloadPlayer();
+    };
+    langRow.appendChild(btn);
+  });
+  ss.appendChild(langRow);
+
+  // Ligne SERVEUR
+  const srvRow = document.createElement('div');
+  srvRow.style.cssText = 'display:flex;align-items:center;gap:8px;flex-wrap:wrap;';
+  const srvLabel = document.createElement('span');
+  srvLabel.className = 'server-label';
+  srvLabel.textContent = 'SERVEUR :';
+  srvRow.appendChild(srvLabel);
+
+  serverDefs.forEach(srv => {
+    const btn = document.createElement('button');
+    btn.className = 'server-btn' + (srv.key === currentServerKey ? ' active' : '');
+    btn.textContent = srv.name;
+    btn.onclick = () => {
+      currentServerKey = srv.key;
+      document.querySelectorAll('.server-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      reloadPlayer();
+    };
+    srvRow.appendChild(btn);
+  });
+  ss.appendChild(srvRow);
+}
+
+function buildSeasons(numSeasons) {
+  const st = document.getElementById('season-tabs');
+  st.innerHTML = '';
+  for (let s = 1; s <= numSeasons; s++) {
+    const btn = document.createElement('button');
+    btn.className = 'season-tab' + (s === 1 ? ' active' : '');
+    btn.textContent = `Saison ${s}`;
+    const season = s;
+    btn.onclick = () => {
+      document.querySelectorAll('.season-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentSeason = season;
+      buildEpisodes(season);
+    };
+    st.appendChild(btn);
+  }
+  buildEpisodes(1);
+}
+
+// Nombre exact d'épisodes par série (tmdbId) et par saison
+const episodesPerSeason = {
+  // The Walking Dead
+  "1402":   [6, 13, 16, 16, 16, 16, 16, 16, 16, 22, 24],
+  // Breaking Bad
+  "1396":   [7, 13, 13, 13, 16],
+  // Stranger Things
+  "66732":  [8, 9, 9, 9],
+  // The Last of Us
+  "100088": [9, 7],
+  // Squid Game
+  "93405":  [9, 7],
+  // House of the Dragon
+  "94997":  [10, 8],
+  // The Bear
+  "136315": [8, 10, 10],
+  // Shogun
+  "126308": [10],
+};
+
+function getEpisodesCount(tmdbId, season) {
+  const map = episodesPerSeason[tmdbId];
+  if (map && map[season - 1]) return map[season - 1];
+  return 10; // valeur par défaut
+}
+
+function buildEpisodes(season) {
+  const eg = document.getElementById('episodes-grid');
+  eg.innerHTML = '';
+  const numEps = getEpisodesCount(currentItem.tmdbId, season);
+  for (let e = 1; e <= numEps; e++) {
+    const btn = document.createElement('button');
+    btn.className = 'episode-btn' + (e === currentEpisode && season === currentSeason ? ' active' : '');
+    btn.innerHTML = `<span class="ep-num">${e}</span><span class="ep-label">Épisode</span>`;
+    const ep = e;
+    btn.onclick = () => {
+      document.querySelectorAll('.episode-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentEpisode = ep;
+      reloadPlayer();
+    };
+    eg.appendChild(btn);
+  }
+}
+
+function getEmbedUrl() {
+  const srv = serverDefs.find(s => s.key === currentServerKey) || serverDefs[0];
+  const url = srv.getUrl(currentItem, currentLang, currentSeason, currentEpisode);
+  if (!url) return null;
+  // Remplacer les templates {s} et {e} si présents
+  return url.replace('{s}', currentSeason).replace('{e}', currentEpisode);
+}
+
+function resetPlayer() {
+  document.getElementById('modal-player').innerHTML = `
+    <div class="player-placeholder" onclick="loadPlayer()">
+      <div class="play-big"><svg width="28" height="28" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+      <p>Cliquez pour lancer la lecture</p>
+    </div>`;
+}
+
+function loadPlayer() {
+  const srv = serverDefs.find(s => s.key === currentServerKey) || serverDefs[0];
+  const url = getEmbedUrl();
+  const player = document.getElementById('modal-player');
+
+  if (!url) {
+    player.innerHTML = `<div class="player-placeholder" style="cursor:default">
+      <div style="font-size:40px">😕</div>
+      <p style="color:#e8272a;font-weight:600">Lecteur non disponible</p>
+      <p style="font-size:12px;margin-top:8px">Essaie un autre serveur ou une autre langue</p>
+    </div>`;
+    return;
+  }
+
+  // Si c'est un lien externe (ne supporte pas iframe) → bouton d'ouverture
+  if (srv.type === 'link') {
+    player.innerHTML = `<div class="player-placeholder" style="cursor:default;gap:20px">
+      <div style="font-size:48px">🎬</div>
+      <p style="font-size:16px;font-weight:700;color:var(--text)">${currentItem.title}</p>
+      <p style="font-size:13px;color:var(--muted);text-align:center;max-width:320px">Ce lecteur s'ouvre dans un nouvel onglet.<br>Clique sur le bouton ci-dessous pour lancer la lecture.</p>
+      <button onclick="window.location.href='${url}'" style="
+        display:inline-flex;align-items:center;gap:10px;
+        background:var(--accent);color:white;border:none;cursor:pointer;
+        border-radius:10px;padding:14px 28px;font-family:'DM Sans',sans-serif;
+        font-size:15px;font-weight:700;margin-top:4px;
+        transition:opacity 0.2s;
+      " onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Regarder sur ${srv.name.replace('🇫🇷 ','')}
+      </button>
+      <p style="font-size:11px;color:var(--muted);margin-top:4px">Langue : <strong style="color:var(--accent)">${currentLang.toUpperCase()}</strong></p>
+    </div>`;
+    return;
+  }
+
+  player.innerHTML = `<iframe src="${url}" allowfullscreen allow="autoplay; encrypted-media; fullscreen" referrerpolicy="no-referrer" style="border:none;width:100%;height:100%;border-radius:18px 18px 0 0"></iframe>`;
+}
+
+function reloadPlayer() {
+  const player = document.getElementById('modal-player');
+  if (player.querySelector('iframe')) loadPlayer();
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+  resetPlayer();
+}
+
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('modal')) closeModal();
+}
+
+function openSeriesModal() { openModal(series[1]); }
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+  });
+});
+
+document.querySelectorAll('.cat-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+  });
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); closeSearch(); closeAuth(); closeSeeAll(); closeMenu(); }
+});
+
+// =====================================================
+// VOIR TOUT + FAVORIS
+// =====================================================
+let favoris = JSON.parse(localStorage.getItem('novaplay_favoris') || '[]');
+
+function isFavori(id) { return favoris.some(f => f.id === id); }
+
+function toggleFavori(e, item) {
+  e.stopPropagation();
+  if (isFavori(item.id)) {
+    favoris = favoris.filter(f => f.id !== item.id);
+  } else {
+    favoris.push(item);
+  }
+  localStorage.setItem('novaplay_favoris', JSON.stringify(favoris));
+  // Mettre à jour tous les boutons fav de cette carte
+  document.querySelectorAll(`.fav-btn[data-id="${item.id}"]`).forEach(btn => {
+    btn.classList.toggle('active', isFavori(item.id));
+    btn.textContent = isFavori(item.id) ? '❤️' : '🤍';
+  });
+}
+
+const seeAllLabels = {
+  films:   { pre: 'Films',       accent: 'Populaires', items: () => films },
+  series:  { pre: 'Séries',      accent: 'Tendances',  items: () => series },
+  recent:  { pre: 'Récemment',   accent: 'Ajoutés',    items: () => recent },
+  favoris: { pre: 'Mes',         accent: 'Favoris',    items: () => favoris },
+};
+
+function openSeeAll(type) {
+  const cfg = seeAllLabels[type];
+  if (!cfg) return;
+  const items = cfg.items();
+
+  document.getElementById('seeall-title').innerHTML = `${cfg.pre} <span>${cfg.accent}</span>`;
+
+  const grid = document.getElementById('seeall-grid');
+  grid.innerHTML = '';
+
+  if (items.length === 0) {
+    document.getElementById('seeall-count').textContent = '0 titre';
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted)">
+      <div style="font-size:48px;margin-bottom:16px">🤍</div>
+      <p style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:8px">Aucun favori pour l'instant</p>
+      <p style="font-size:13px">Appuie sur 🤍 sur un film ou une série pour l'ajouter ici</p>
+    </div>`;
+  } else {
+    document.getElementById('seeall-count').textContent = `${items.length} titre${items.length > 1 ? 's' : ''}`;
+    items.forEach(item => {
+      const card = createCard(item);
+      card.onclick = () => { closeSeeAll(); openModal(item); };
+      grid.appendChild(card);
+    });
+  }
+
+  document.getElementById('seeall-overlay').classList.add('open');
+  document.getElementById('seeall-overlay').scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSeeAll() {
+  document.getElementById('seeall-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// =====================================================
+// MENU HAMBURGER
+// =====================================================
+function toggleMenu() {
+  const menu = document.getElementById('side-menu');
+  const backdrop = document.getElementById('menu-backdrop');
+  const btn = document.getElementById('hamburger-btn');
+  const isOpen = menu.classList.contains('open');
+  menu.classList.toggle('open', !isOpen);
+  backdrop.classList.toggle('open', !isOpen);
+  btn.classList.toggle('open', !isOpen);
+}
+function closeMenu() {
+  document.getElementById('side-menu').classList.remove('open');
+  document.getElementById('menu-backdrop').classList.remove('open');
+  document.getElementById('hamburger-btn').classList.remove('open');
+}
+function scrollToSection(id) {
+  const el = document.getElementById(id);
+  if (el) { el.scrollIntoView({ behavior: 'smooth' }); }
+}
+
+// =====================================================
+// RECHERCHE
+// =====================================================
+function openSearch() {
+  document.getElementById('search-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('search-input').focus(), 50);
+}
+function closeSearch() {
+  document.getElementById('search-overlay').classList.remove('open');
+  document.getElementById('search-input').value = '';
+  document.getElementById('search-results-container').innerHTML = '<p class="search-hint">Commence à taper pour rechercher dans le catalogue...</p>';
+  document.body.style.overflow = '';
+}
+function closeSearchOutside(e) {
+  if (e.target === document.getElementById('search-overlay')) closeSearch();
+}
+function handleSearch(query) {
+  const container = document.getElementById('search-results-container');
+  if (!query.trim()) {
+    container.innerHTML = '<p class="search-hint">Commence à taper pour rechercher dans le catalogue...</p>';
+    return;
+  }
+  const q = query.toLowerCase();
+  const allItems = [...films, ...series, ...recent];
+  const seen = new Set();
+  const results = allItems.filter(item => {
+    if (seen.has(item.id)) return false;
+    seen.add(item.id);
+    return item.title.toLowerCase().includes(q) || item.genre.toLowerCase().includes(q);
+  });
+  if (results.length === 0) {
+    container.innerHTML = `<p class="search-no-result">Aucun résultat pour "<strong style="color:var(--text)">${query}</strong>"</p>`;
+    return;
+  }
+  const grid = document.createElement('div');
+  grid.className = 'search-results';
+  results.forEach(item => {
+    const card = createCard(item);
+    card.onclick = () => { closeSearch(); openModal(item); };
+    grid.appendChild(card);
+  });
+  container.innerHTML = `<p style="color:var(--muted);font-size:12px;margin:10px 0 14px">${results.length} résultat${results.length > 1 ? 's' : ''} trouvé${results.length > 1 ? 's' : ''}</p>`;
+  container.appendChild(grid);
+}
+
+// =====================================================
+// AUTH (stockage local simple)
+// =====================================================
+let currentUser = JSON.parse(localStorage.getItem('novaplay_user') || 'null');
+
+function updateNavAuth() {
+  const btn = document.getElementById('nav-auth-btn');
+  if (currentUser) {
+    const initials = currentUser.name ? currentUser.name.slice(0,2).toUpperCase() : currentUser.email.slice(0,2).toUpperCase();
+    btn.innerHTML = `<button class="user-avatar" onclick="logoutUser()" title="Se déconnecter (${currentUser.email})">${initials}</button>`;
+  } else {
+    btn.innerHTML = `<button class="btn-login" onclick="openAuth()">Connexion</button>`;
+  }
+}
+
+function openAuth() {
+  if (currentUser) { logoutUser(); return; }
+  document.getElementById('auth-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeAuth() {
+  document.getElementById('auth-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  // Reset messages
+  ['login-error','login-success','reg-error','reg-success'].forEach(id => document.getElementById(id).style.display = 'none');
+}
+function closeAuthOutside(e) {
+  if (e.target === document.getElementById('auth-overlay')) closeAuth();
+}
+function switchAuthTab(tab, btn) {
+  document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('auth-login').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('auth-register').style.display = tab === 'register' ? 'block' : 'none';
+}
+
+function handleLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  const okEl = document.getElementById('login-success');
+  errEl.style.display = 'none'; okEl.style.display = 'none';
+
+  if (!email || !pass) { errEl.textContent = 'Remplis tous les champs.'; errEl.style.display = 'block'; return; }
+
+  const users = JSON.parse(localStorage.getItem('novaplay_users') || '[]');
+  const user = users.find(u => u.email === email && u.password === pass);
+  if (!user) { errEl.textContent = 'Email ou mot de passe incorrect.'; errEl.style.display = 'block'; return; }
+
+  currentUser = user;
+  localStorage.setItem('novaplay_user', JSON.stringify(user));
+  okEl.style.display = 'block';
+  updateNavAuth();
+  setTimeout(() => closeAuth(), 900);
+}
+
+function handleRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass = document.getElementById('reg-password').value;
+  const errEl = document.getElementById('reg-error');
+  const okEl = document.getElementById('reg-success');
+  errEl.style.display = 'none'; okEl.style.display = 'none';
+
+  if (!name || !email || !pass) { errEl.textContent = 'Remplis tous les champs.'; errEl.style.display = 'block'; return; }
+  if (pass.length < 6) { errEl.textContent = 'Mot de passe trop court (min. 6 caractères).'; errEl.style.display = 'block'; return; }
+
+  const users = JSON.parse(localStorage.getItem('novaplay_users') || '[]');
+  if (users.find(u => u.email === email)) { errEl.textContent = 'Cet email est déjà utilisé.'; errEl.style.display = 'block'; return; }
+
+  const newUser = { name, email, password: pass };
+  users.push(newUser);
+  localStorage.setItem('novaplay_users', JSON.stringify(users));
+  okEl.style.display = 'block';
+  // Switch auto vers login après inscription
+  setTimeout(() => { switchAuthTab('login', document.querySelectorAll('.auth-tab')[0]); document.getElementById('login-email').value = email; }, 1200);
+}
+
+function logoutUser() {
+  currentUser = null;
+  localStorage.removeItem('novaplay_user');
+  updateNavAuth();
+}
+
+// Init auth state
+updateNavAuth();
+
+renderGrids();
+initHero();
+</script>
